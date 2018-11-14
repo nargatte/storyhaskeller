@@ -1,0 +1,55 @@
+name:                storyhaskeller
+version:             0.1.0.0
+github:              "githubuser/storyhaskeller"
+license:             BSD3
+author:              "Grzegorz Krzysiak"
+maintainer:          "krzysiak.grzegorz@gmail.com"
+copyright:           "2018 Grzegorz Krzysiak"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/githubuser/storyhaskeller#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+- parsec >= 3.1.13.0
+- containers
+- HUnit
+- dlist
+- regex-posix
+
+library:
+  source-dirs: src
+
+executables:
+  storyhaskeller-exe:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -Wall
+    dependencies:
+    - storyhaskeller
+
+tests:
+  storyhaskeller-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -Wall
+    dependencies:
+    - storyhaskeller

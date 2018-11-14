@@ -1,0 +1,131 @@
+
+/* 
+ * plik testowy
+ * reprezentuje wybrane wzorce i moc parsera
+ * przykładów gra ma być "symulacją" życia na wsi
+ * podnieś klucz w chacie, którym otworzy szopę, w której
+ * znajdzie siekierę, którą narąbie drewna przy pniaku 
+ * dostępny jest także framework do obsługi dialogowego ekwipunku
+ */
+
+ 
+frame main {
+    // zakładam, że gra będzie się zaczynać od frame nazwanego "main"
+
+    tell
+    "Budzi Cie pianie koguta.\n
+    Słońce wydobywające się za okna razi zaspane oczy.
+     
+    Zaczyna się nowy dzień pracy"
+    // składanie stringów przypomina działanie LaTeX
+    // omija ciągi białych znaków zostawiając jedynie spacje
+    // jedna pusta linia to nowy akapit, ale /n również działa
+
+    escape "jeszcze 5 minut" go luzko
+    escape "wstaje" go chata
+
+    // rejestrujemy dwa punkty wyjścia
+    // posiadające po jednej instrukcji
+}
+
+// Procedury mogą służyć jako pewnego rodzaju 
+// tagowanie kart, w tym przypadku chcemy aby w każdym
+// frame "otagowanym" frame_location wyświetlił się dodatkowo
+// opcja wyboru ekwipunku
+procedure frame_location {
+    escape "ekwipunek" go ekwipunek
+}
+
+// Można oglądać tylko te przedmioty które aktualnie się posiada
+dialog ekwipunek {
+    tell "Wybierz interesujący ciebie przedmiot" 
+    if iKey escape "klucz" go key_info
+    if iAxe escape "siekiera" go axe_info
+	escape "wyjdź" return
+}
+
+dialog key_info {
+    tell 
+    "To jest stary zerdzewiały klucz\n
+    Zapewne do szopy"
+    escape "wróć" return 
+    // procedura return oznacza tyle samo co go do poprzedniej karty
+    // typu frame
+}
+
+dialog axe_info {
+    tell 
+    "Stara dobra siekiera\n
+    Najlepszy przyjaciel drwala"
+    escape "wróć" return
+}
+        
+frame luzko {
+    tell 
+    "Nie można tyle spać!!!\n
+    WSTAWAJ LENIU!!"
+
+    escape "ok :(" go chata
+}
+
+frame chata {
+    tell "Znajdujesz się w małej chacie"
+    ifnot iKey {
+        tell "\nNa stole leży jakiś klucz"
+        escape "podnieś klucz" {
+            set iKey
+            go key_info
+        }
+    }
+
+    // tu się dzieją ciekawe rzeczy
+    // na początku wchodzimy do tego ifa jeśli flaga iKey
+    // nie jest ustawiona, przedrostek "i" od inventory
+    // wtedy dodatkowo wypisuje komunikat i rejestruje
+    // wyjście które dodatkowo ustawia flagę
+    // i na samym końcu przechodzony do karty z informacją o kluczu
+    // przy następnym wyświetleniu karty komunikatu i 
+    // punktu wyjścia nie będzie
+
+    execute frame_location 
+    // otagowanie jako frame lokacji
+    // dzięki temu jest możliwość wybrania opcji ekwipunku 
+
+    escape "wyjdź z chaty" go podworko
+}
+
+frame podworko {
+    tell 
+    "Jesteś na podwórku\n
+    Przy chacie jest stary pieniek"
+    if wood tell "i trochę narąbanego drewna"
+    if iAxe{
+        escape "Rąb drewno siekierą" {
+            set wood
+            // brak instrukcji go w escape 
+            // przeniesie do tej samej karty ponownie
+        }
+    }
+    execute frame_location
+
+    escape "wejdź do chaty" go chata
+    escape "wejdź do szopy" go szopa
+}
+
+frame szopa {
+    if iKey {
+        tell "Otwierasz drzwi kluczem"
+        ifnot iAxe {
+            tell "\nW środku znajduje się siekiera"
+            escape "podnieś siekierę" {
+                set iAxe
+                go axe_info
+            } 
+        }
+        escape "wyjdź" go podworko
+    } else {
+        tell "Dziw są zamknięte na klucz"
+        escape "wróć" go podworko
+    }
+    execute frame_location
+}
